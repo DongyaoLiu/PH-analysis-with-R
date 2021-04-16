@@ -1,0 +1,23 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+We prospectively enrolled infants with gestational age <34 weeks gestation and collected blood samples during their first week of life. BPD and PH were assessed at 36 weeks postmenstrual age. Samples were assayed for each of the 1121 peptides included in the SOMAscanTM technology, with subsequent pathway analysis.
+```{r}
+GSE121097 = GEOquery::getGEO(GEO = 'GSE121097', AnnotGPL = T, destdir = '.')
+exprs <- rawdata[[1]]
+eset <- exprs(exprs)
+pset <- pData(exprs)
+fdata <- fData(exprs)
+```
+
+```{r}
+
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
