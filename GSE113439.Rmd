@@ -1,0 +1,64 @@
+---
+title: "GSE113439 R Notebook"
+output: html_notebook
+---
+
+Fresh frozen lung samples were obtained from the recipients organs of 15 patients with PAH and 11 normal controls (normal lung tissue obtained from tissue flanking lung cancer resections). The PAH group included 6 patients with idiopathic PAH, 4 patients with PAH secondary to connective tissue disease (CTD), 4 patients with PAH secondary to congenital heart disease (CHD) and 1 patient with chronic thromboembolic pulmonary hypertension (CTEPH). RNA was extracted and hybridized on Affymetrix microarrays.
+```{r}
+library(GEOquery)
+library(limma)
+library(tidyr)
+library(tidyverse)
+library(dplyr)
+library(tibble)
+library(org.Hs.eg.db)
+library(hugene10sttranscriptcluster.db)
+#https://support.bioconductor.org/p/9136239/
+```
+
+
+```{r}
+GSE121097 = GEOquery::getGEO(GEO = 'GSE113439', AnnotGPL = T, destdir = '.')
+exprs <- GSE121097[[1]]
+eset <- exprs(exprs)
+pset <- pData(exprs)
+fdata <- fData(exprs)
+```
+
+```{r}
+eset <- as.data.frame(eset)
+eset <- eset[ , -c(2:4,7:10,13,15)]
+plotDensities(eset)
+eset <- normalizeBetweenArrays(eset)
+plotDensities(eset)
+
+```
+```{r}
+#GPL6244 <- getGEO('GPL6244', destdir = ".")
+ls("package:hugene10sttranscriptcluster.db")
+symbol <- toTable(hugene10sttranscriptclusterSYMBOL)
+eset <- as.data.frame(eset)
+eset <- rownames_to_column(eset)
+eset$rowname <- as.character(eset$rowname)
+exprset <- inner_join(eset, symbol, by = c("rowname" = "probe_id"))
+exprset <- distinct(exprset, symbol, .keep_all = T)
+exprset <- column_to_rownames(exprset, var = "symbol")
+exprset <- exprset[ , -1]
+group <- factor(c(rep("PAH", 6), rep("con", 11)))
+```
+
+
+```{r}
+linermatrix <- model.matrix(~0+group)
+fit = lmFit(exprset, linermatrix)
+fit = eBayes(fit)
+allTtest = topTable(fit, adjust.method = "BH", coef = 2, number = 18813)
+save(group, exprset, pset, allTtest, file = "GSE113439_clean_exprset.RData")
+```
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
